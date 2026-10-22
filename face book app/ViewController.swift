@@ -24,6 +24,7 @@ class ViewController: UIViewController {
         view.backgroundColor = .systemBackground
         title = "face book"
         setupTableView()
+        setupActivityIndicator() //spinner
         loadUsers()
     }
 
@@ -45,8 +46,11 @@ class ViewController: UIViewController {
     
     
     private func loadUsers(){
+        //show the spinner spinning before we begin network call
+        activityIndicator.startAnimating()
         Task{
-            do{
+            defer{ activityIndicator.stopAnimating() }
+            do {
                 users = try await NetworkManager.shared.fetchUsers()
                 tableView.reloadData()
             } catch {
@@ -55,10 +59,27 @@ class ViewController: UIViewController {
         }
     }
     
+    
+    //MARK: loading spinner
+    private let activityIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+            indicator.translatesAutoresizingMaskIntoConstraints = false
+            //When stopped, hide it automatically
+            indicator.hidesWhenStopped = true
+            return indicator
+    }()
+    
+    private func setupActivityIndicator(){
+        view.addSubview(activityIndicator)
+        NSLayoutConstraint.activate([
+            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+    }
 
 }
 
-
+//MARK: UITableViewDataSource
 extension ViewController: UITableViewDataSource {
     //one row per user
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
