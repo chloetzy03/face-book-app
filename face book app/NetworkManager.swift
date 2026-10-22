@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 class NetworkManager{
     //one shared copy everyone uses so we dont create new manager everytime
@@ -32,6 +33,28 @@ class NetworkManager{
 
         //return users array 
         return decoded.users
+    }
+    
+    func fetchImage(from urlString: String) async throws -> UIImage {
+        //turn the text into url, if text invalid, stop and report
+        guard let url = URL(string: urlString) else {
+            throw URLError(.badURL)
+        }
+        
+        //download raw bytes and wait
+        let (data, response) = try await URLSession.shared.data(from: url)
+        
+        //make sure server says ok
+        guard let httpResponse = response as? HTTPURLResponse,(200...299).contains(httpResponse.statusCode) else {
+            throw URLError(.badServerResponse) //report error
+        }
+        
+        // If the bytes aren't a valid image, report an error instead of crashing
+        guard let image = UIImage(data: data) else {
+            throw URLError(.cannotDecodeContentData)
+        }
+        
+        return image
     }
     
 }
