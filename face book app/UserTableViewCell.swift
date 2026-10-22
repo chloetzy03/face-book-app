@@ -9,7 +9,7 @@ import UIKit
 
 class UserTableViewCell: UITableViewCell {
 
-    let reuseID = "UserCell"
+    static let reuseID = "UserCell" //static belongs to class itself
     
     //MARK: UI elements
     private let nameLabel: UILabel = {
